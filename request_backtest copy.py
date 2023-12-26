@@ -49,10 +49,11 @@ def main():
      # use strategy1 on Nasdaq QQQM
      NDX2QQQM_ratio = 100
      print("initial QQQM account shares: ",account_shares,"\ninitial QQQM account money: ",account_money)
-     NDX_account_shares,NDX_account_money,NDX_PRICEcurrent = strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
+     NDX_account_shares,NDX_account_money,NDX_PRICEcurrent,NDX_long_hold_shares,NDX_long_hold_value = strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
                PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3,PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3,\
                     account_money,account_shares,buy_shares_1,buy_shares_2,buy_shares_3,sell_shares_1,sell_shares_2,sell_shares_3,NDX2QQQM_ratio)
-     print("final QQQM account shares: ",NDX_account_shares,"\nfinal QQQM account money: ",NDX_account_money,"\nfinal QQQM shares and money combined: ",NDX_account_money+NDX_account_shares*NDX_PRICEcurrent/NDX2QQQM_ratio)
+     print("final QQQM account shares: ",NDX_account_shares,"\nfinal QQQM account money: ",NDX_account_money,"\nfinal QQQM shares and money combined: ",NDX_account_money+NDX_account_shares*NDX_PRICEcurrent/NDX2QQQM_ratio,"\n")
+     print("QQQM shares if buy from start: ",NDX_long_hold_shares,"\nQQQM value if buy from start:",NDX_long_hold_value,"\n")
      ### SP500 info ###
      url_SP500_PE = "https://danjuanfunds.com/djapi/index_eva/pe_history/SP500?day=all"
      url_SP500_PB = "https://danjuanfunds.com/djapi/index_eva/pb_history/SP500?day=all"
@@ -91,10 +92,11 @@ def main():
      # use strategy1 on SP500
      SPX2IVV_ratio = 10
      print("initial IVV account shares: ",account_shares,"\ninitial IVV account money: ",account_money)
-     SP500_account_shares,SP500_account_money,SP500_PRICEcurrent = strategy1(SP500_PEnum_s,PE_TSnum_s,SP500_PBnum_s,SP500_PRICEnum_s,SP500_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
+     SP500_account_shares,SP500_account_money,SP500_PRICEcurrent,SP500_long_hold_shares,SP500_long_hold_value = strategy1(SP500_PEnum_s,PE_TSnum_s,SP500_PBnum_s,SP500_PRICEnum_s,SP500_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
                PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3,PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3,\
                     account_money,account_shares,buy_shares_1,buy_shares_2,buy_shares_3,sell_shares_1,sell_shares_2,sell_shares_3,SPX2IVV_ratio)
      print("final IVV account shares: ",SP500_account_shares,"\nfinal IVV account money: ",SP500_account_money,"\nfinal IVV shares and money combined: ",SP500_account_money+SP500_account_shares*SP500_PRICEcurrent/SPX2IVV_ratio)
+     print("SP500 shares if buy from start: ",SP500_long_hold_shares,"\nSP500 value if buy from start:",SP500_long_hold_value,"\n")
 
 def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
               PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3,PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3,\
@@ -129,6 +131,8 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
      NDX_PRICE70 = NDX_PRICEsorted_s[math.ceil(0.7*NDX_PRICElen)-1]
      NDX_PRICE80 = NDX_PRICEsorted_s[math.ceil(0.8*NDX_PRICElen)-1]
      NDX_PRICEcurrent = NDX_PRICEnum_s[NDX_PRICElen-1]
+     long_hold_shares = math.floor(account_money/NDX_PRICEnum_s[math.floor(NDX_PRICElen/2)]*index2fund_ratio)
+     long_hold_value =  long_hold_shares * NDX_PRICEnum_s[-1]/index2fund_ratio
      #    if  NDX_PEcurrent > NDX_PE80 and NDX_PBcurrent > NDX_PB80:
      #         sell_NDX = 1
      #    else:
@@ -305,7 +309,7 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
                if sell_shares_3 <= account_shares:
                     account_shares = account_shares - sell_shares_3
                     account_money = account_money + sell_shares_3*sell_price
-     return account_shares,account_money,NDX_PRICEcurrent
+     return account_shares,account_money,NDX_PRICEcurrent,long_hold_shares,long_hold_value
 
 
      # ### SP500 strategy ###
