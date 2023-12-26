@@ -4,6 +4,7 @@ from datetime import datetime
 import random
 import re
 import math
+import signal
 my_headers = {
 	'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'
 }
@@ -36,20 +37,21 @@ def main():
      PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3 = 0.3,0.2,0.1
      PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3 = 1.0,1.0,1.0
      PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3 = 0.7,0.8,0.9
-     PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3 = 0.7,0.8,0.9
+     PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3 = 0.3,0.3,0.6
      # account input: 
      account_money = 100000.0
      buy_shares_1 = 30
      buy_shares_2 = 100
      buy_shares_3 = 100
-     sell_shares_1 = 10
-     sell_shares_2 = 100
+     sell_shares_1 = 0
+     sell_shares_2 = 0
      sell_shares_3 = 100
      account_shares = 0
      # use strategy1 on Nasdaq QQQM
      NDX2QQQM_ratio = 100
      print("initial QQQM account shares: ",account_shares,"\ninitial QQQM account money: ",account_money)
-     NDX_account_shares,NDX_account_money,NDX_PRICEcurrent,NDX_long_hold_shares,NDX_long_hold_value = strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
+     NDX_account_shares,NDX_account_money,NDX_PRICEcurrent,NDX_long_hold_shares,NDX_long_hold_value,NDX_buy_price_list,NDX_sell_price_list,NDX_buy_date_list,NDX_sell_date_list,NDX_actual_buy_price_list,NDX_actual_buy_date_list,NDX_actual_sell_price_list,NDX_actual_sell_date_list\
+            = strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
                PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3,PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3,\
                     account_money,account_shares,buy_shares_1,buy_shares_2,buy_shares_3,sell_shares_1,sell_shares_2,sell_shares_3,NDX2QQQM_ratio)
      print("final QQQM account shares: ",NDX_account_shares,"\nfinal QQQM account money: ",NDX_account_money,"\nfinal QQQM shares and money combined: ",NDX_account_money+NDX_account_shares*NDX_PRICEcurrent/NDX2QQQM_ratio,"\n")
@@ -78,25 +80,27 @@ def main():
      # strategy for SP500 parameter
      PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3 = 0.3,0.2,0.1
      PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3 = 1.0,1.0,1.0
-     PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3 = 0.7,0.8,0.9
-     PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3 = 0.3,0.3,0.3
+     PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3 = 0.7,0.8,1.0
+     PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3 = 0.3,0.3,1.0
      # account input: 
      account_money = 200000.0
      buy_shares_1 = 20
-     buy_shares_2 = 40
-     buy_shares_3 = 50
+     buy_shares_2 = 100
+     buy_shares_3 = 100
      sell_shares_1 = 0
      sell_shares_2 = 0
-     sell_shares_3 = 20
+     sell_shares_3 = 0
      account_shares = 0
      # use strategy1 on SP500
      SPX2IVV_ratio = 10
      print("initial IVV account shares: ",account_shares,"\ninitial IVV account money: ",account_money)
-     SP500_account_shares,SP500_account_money,SP500_PRICEcurrent,SP500_long_hold_shares,SP500_long_hold_value = strategy1(SP500_PEnum_s,PE_TSnum_s,SP500_PBnum_s,SP500_PRICEnum_s,SP500_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
+     SP500_account_shares,SP500_account_money,SP500_PRICEcurrent,SP500_long_hold_shares,SP500_long_hold_value,SP500_buy_price_list,SP500_sell_price_list,SP500_buy_date_list,SP500_sell_date_list,SP500_actual_buy_price_list,SP500_actual_buy_date_list,SP500_actual_sell_price_list,SP500_actual_sell_date_list\
+            = strategy1(SP500_PEnum_s,PE_TSnum_s,SP500_PBnum_s,SP500_PRICEnum_s,SP500_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
                PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3,PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3,\
                     account_money,account_shares,buy_shares_1,buy_shares_2,buy_shares_3,sell_shares_1,sell_shares_2,sell_shares_3,SPX2IVV_ratio)
      print("final IVV account shares: ",SP500_account_shares,"\nfinal IVV account money: ",SP500_account_money,"\nfinal IVV shares and money combined: ",SP500_account_money+SP500_account_shares*SP500_PRICEcurrent/SPX2IVV_ratio)
      print("SP500 shares if buy from start: ",SP500_long_hold_shares,"\nSP500 value if buy from start:",SP500_long_hold_value,"\n")
+     signal.pause()
 
 def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
               PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3,PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3,\
@@ -159,9 +163,13 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
      #    account_shares_USD = 0
      # buy_price = 0
      buy_price_list = []
-     buy_date = []
-     sell_date = []
+     buy_date_list = []
+     sell_date_list = []
      sell_price_list = []
+     actual_buy_price_list = []
+     actual_buy_date_list = []
+     actual_sell_date_list = []
+     actual_sell_price_list = []
      eval_start = math.ceil(NDX_PElen/2) # start the evaluation from the 6th yr, using the first 5 yrs as index
      for i in range(eval_start,NDX_PElen):
           # PE
@@ -191,18 +199,22 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
                               #    buy price at QQQM
                               buy_price = NDX_PRICEnum_s[j]/index2fund_ratio
                               buy_price_list.append(buy_price)
-                              buy_date.append(NDX_PRICE_DATE_str_s[j])
+                              buy_date = NDX_PRICE_DATE_str_s[j]
+                              buy_date_list.append(buy_date)
                     elif NDX_PRICE_DATE_str_s[j] >= PE_TSs[i] and NDX_PRICE_DATE_str_s[j] < PE_TSs[i+1]:
                          #    buy price at QQQM
                          buy_price = NDX_PRICEnum_s[j]/index2fund_ratio
                          buy_price_list.append(buy_price)
-                         buy_date.append(NDX_PRICE_DATE_str_s[j])
+                         buy_date = NDX_PRICE_DATE_str_s[j]
+                         buy_date_list.append(buy_date)
                     else:
                          continue
                #    enough money
-               if account_money >= buy_shares_1*buy_price:
+               if account_money >= buy_shares_1*buy_price and buy_shares_1>0:
                     account_shares = account_shares + buy_shares_1
                     account_money = account_money - buy_shares_1*buy_price
+                    actual_buy_price_list.append(buy_price)
+                    actual_buy_date_list.append(buy_date)
           #    buy strategy 2 satisfied
           if NDX_PBnum_s[i] < PB20 and NDX_PEnum_s[i] < PE20:
                for j in range(NDX_PRICElen):
@@ -212,18 +224,22 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
                               #    buy price at QQQM
                               buy_price = NDX_PRICEnum_s[j]/index2fund_ratio
                               buy_price_list.append(buy_price)
-                              buy_date.append(NDX_PRICE_DATE_str_s[j])
+                              buy_date = NDX_PRICE_DATE_str_s[j]
+                              buy_date_list.append(buy_date)
                     elif NDX_PRICE_DATE_str_s[j] >= PE_TSs[i] and NDX_PRICE_DATE_str_s[j] < PE_TSs[i+1]:
                          #    buy price at QQQM
                          buy_price = NDX_PRICEnum_s[j]/index2fund_ratio
                          buy_price_list.append(buy_price)
-                         buy_date.append(NDX_PRICE_DATE_str_s[j])
+                         buy_date = NDX_PRICE_DATE_str_s[j]
+                         buy_date_list.append(buy_date)
                     else:
                          continue
                #    enough money
-               if account_money >= buy_shares_2*buy_price:
+               if account_money >= buy_shares_2*buy_price and buy_shares_2>0:
                     account_shares = account_shares + buy_shares_2
                     account_money = account_money - buy_shares_2*buy_price
+                    actual_buy_price_list.append(buy_price)
+                    actual_buy_date_list.append(buy_date)
           #    buy strategy 3 satisfied
           if NDX_PBnum_s[i] < PB10 and NDX_PEnum_s[i] < PE10:
                for j in range(NDX_PRICElen):
@@ -233,18 +249,22 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
                               #    buy price at QQQM
                               buy_price = NDX_PRICEnum_s[j]/index2fund_ratio
                               buy_price_list.append(buy_price)
-                              buy_date.append(NDX_PRICE_DATE_str_s[j])
+                              buy_date = NDX_PRICE_DATE_str_s[j]
+                              buy_date_list.append(buy_date)
                     elif NDX_PRICE_DATE_str_s[j] >= PE_TSs[i] and NDX_PRICE_DATE_str_s[j] < PE_TSs[i+1]:
                          #    buy price at QQQM
                          buy_price = NDX_PRICEnum_s[j]/index2fund_ratio
                          buy_price_list.append(buy_price)
-                         buy_date.append(NDX_PRICE_DATE_str_s[j])
+                         buy_date = NDX_PRICE_DATE_str_s[j]
+                         buy_date_list.append(buy_date)
                     else:
                          continue
                #    enough money
-               if account_money >= buy_shares_3*buy_price:
+               if account_money >= buy_shares_3*buy_price and buy_shares_3>0:
                     account_shares = account_shares + buy_shares_3
                     account_money = account_money - buy_shares_3*buy_price
+                    actual_buy_price_list.append(buy_price)
+                    actual_buy_date_list.append(buy_date)
 
           #    sell strategy 1 satisfied
           if NDX_PBnum_s[i] > PB70 and NDX_PEnum_s[i] > PE70:
@@ -255,18 +275,23 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
                               #    sell price at QQQM
                               sell_price = NDX_PRICEnum_s[k]/index2fund_ratio
                               sell_price_list.append(sell_price)
-                              sell_date.append(NDX_PRICE_DATE_str_s[k])
+                              sell_date = NDX_PRICE_DATE_str_s[k]
+                              sell_date_list.append(sell_date)
                     elif NDX_PRICE_DATE_str_s[k] >= PE_TSs[i] and NDX_PRICE_DATE_str_s[k] < PE_TSs[i+1]:
                          #    sell price at QQQM
                          sell_price = NDX_PRICEnum_s[k]/index2fund_ratio
                          sell_price_list.append(sell_price)
-                         sell_date.append(NDX_PRICE_DATE_str_s[k])
+                         sell_date = NDX_PRICE_DATE_str_s[k]
+                         sell_date_list.append(sell_date)
                     else:
                          continue
                #    enough shares
-               if sell_shares_1 <= account_shares:
+               if sell_shares_1 <= account_shares and sell_shares_1 > 0:
                     account_shares = account_shares - sell_shares_1
                     account_money = account_money + sell_shares_1*sell_price
+                    actual_sell_price_list.append(sell_price)
+                    actual_sell_date_list.append(sell_date)
+                    
                #    sell strategy 2 satisfied
           if NDX_PBnum_s[i] > PB80 and NDX_PEnum_s[i] > PE80:
                for k in range(NDX_PRICElen):
@@ -276,18 +301,22 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
                               #    sell price at QQQM
                               sell_price = NDX_PRICEnum_s[k]/index2fund_ratio
                               sell_price_list.append(sell_price)
-                              sell_date.append(NDX_PRICE_DATE_str_s[k])
+                              sell_date = NDX_PRICE_DATE_str_s[k]
+                              sell_date_list.append(sell_date)
                     elif NDX_PRICE_DATE_str_s[k] >= PE_TSs[i] and NDX_PRICE_DATE_str_s[k] < PE_TSs[i+1]:
                          #    sell price at QQQM
                          sell_price = NDX_PRICEnum_s[k]/index2fund_ratio
                          sell_price_list.append(sell_price)
-                         sell_date.append(NDX_PRICE_DATE_str_s[k])
+                         sell_date = NDX_PRICE_DATE_str_s[k]
+                         sell_date_list.append(sell_date)
                     else:
                          continue
                #    enough shares
-               if sell_shares_2 <= account_shares:
+               if sell_shares_2 <= account_shares and sell_shares_2 > 0:
                     account_shares = account_shares - sell_shares_2
                     account_money = account_money + sell_shares_2*sell_price
+                    actual_sell_price_list.append(sell_price)
+                    actual_sell_date_list.append(sell_date)
                #    sell strategy 3 satisfied
           if NDX_PBnum_s[i] > PB90 and NDX_PEnum_s[i] > PE90:
                for k in range(NDX_PRICElen):
@@ -297,19 +326,24 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
                               #    sell price at QQQM
                               sell_price = NDX_PRICEnum_s[k]/index2fund_ratio
                               sell_price_list.append(sell_price)
-                              sell_date.append(NDX_PRICE_DATE_str_s[k])
+                              sell_date = NDX_PRICE_DATE_str_s[k]
+                              sell_date_list.append(sell_date)
                     elif NDX_PRICE_DATE_str_s[k] >= PE_TSs[i] and NDX_PRICE_DATE_str_s[k] < PE_TSs[i+1]:
                          #    sell price at QQQM
                          sell_price = NDX_PRICEnum_s[k]/index2fund_ratio
                          sell_price_list.append(sell_price)
-                         sell_date.append(NDX_PRICE_DATE_str_s[k])
+                         sell_date = NDX_PRICE_DATE_str_s[k]
+                         sell_date_list.append(sell_date)
                     else:
                          continue
                #    enough shares
-               if sell_shares_3 <= account_shares:
+               if sell_shares_3 <= account_shares and sell_shares_3 > 0:
                     account_shares = account_shares - sell_shares_3
                     account_money = account_money + sell_shares_3*sell_price
-     return account_shares,account_money,NDX_PRICEcurrent,long_hold_shares,long_hold_value
+                    actual_sell_price_list.append(sell_price)
+                    actual_sell_date_list.append(sell_date)
+     return account_shares,account_money,NDX_PRICEcurrent,long_hold_shares,long_hold_value,buy_price_list,sell_price_list,buy_date_list,sell_date_list,\
+          actual_buy_price_list,actual_buy_date_list,actual_sell_price_list,actual_sell_date_list
 
 
      # ### SP500 strategy ###
