@@ -15,7 +15,7 @@ def main():
      ### Nasdaq info ###
      url_NDX_PE = "https://danjuanfunds.com/djapi/index_eva/pe_history/NDX?day=all"
      url_NDX_PB = "https://danjuanfunds.com/djapi/index_eva/pb_history/NDX?day=all"
-     url_NDX_PRICE = "https://danjuanfunds.com/djapi/fundx/base/index/nav/growth?symbol=GINDX&day=10y" #actually 20y
+     url_NDX_PRICE = "https://danjuanfunds.com/djapi/fundx/base/index/nav/growth?symbol=GINDX&day=10y" #actually 20yrs
      ## PE
      #    r_NDX_PE = requests.get(url_NDX_PE,headers=my_headers,proxies=proxy,verify=False)
      r_NDX_PE = requests.get(url_NDX_PE,headers=my_headers)
@@ -32,8 +32,9 @@ def main():
      NDX_PRICEstr_s = re.findall('"gr_nav":"(.*?)","gr_per"',r_NDX_PRICE.text)
      NDX_PRICE_DATE_str_s = re.findall('"date":"(.*?)","gr_nav"',r_NDX_PRICE.text)
      NDX_PRICEnum_s = [float(x) for x in NDX_PRICEstr_s]
-     start_yr = 1 # start year of evaluation: from 1 - 10
-     trace_yr = 1 # tracing back years from selected start year: from 1 - 9
+
+     start_yr = 4 # start year of evaluation: from 1 - 10
+     trace_yr = 0.05 # tracing back years from selected start year: from 1 - 9
      # strategy for NDX parameter
      PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3 = 0.3,0.2,0.1
      PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3 = 1.0,1.0,1.0
@@ -85,11 +86,11 @@ def main():
      PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3 = 0.3,0.3,1.0
      # account input: 
      account_money = 200000.0
-     buy_shares_1 = 20
-     buy_shares_2 = 100
-     buy_shares_3 = 100
+     buy_shares_1 = 10
+     buy_shares_2 = 20
+     buy_shares_3 = 30
      sell_shares_1 = 0
-     sell_shares_2 = 30
+     sell_shares_2 = 10
      sell_shares_3 = 30
      account_shares = 0
      # use strategy1 on SP500
@@ -136,7 +137,7 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
      NDX_PRICE70 = NDX_PRICEsorted_s[math.ceil(0.7*NDX_PRICElen)-1]
      NDX_PRICE80 = NDX_PRICEsorted_s[math.ceil(0.8*NDX_PRICElen)-1]
      NDX_PRICEcurrent = NDX_PRICEnum_s[NDX_PRICElen-1]
-     long_hold_shares = math.floor(account_money/NDX_PRICEnum_s[math.ceil(NDX_PRICElen/10*start_yr)]*index2fund_ratio)
+     long_hold_shares = math.floor(account_money/NDX_PRICEnum_s[math.ceil(NDX_PRICElen/20*(start_yr+10))]*index2fund_ratio)
      long_hold_value =  long_hold_shares * NDX_PRICEnum_s[-1]/index2fund_ratio
      #    if  NDX_PEcurrent > NDX_PE80 and NDX_PBcurrent > NDX_PB80:
      #         sell_NDX = 1
