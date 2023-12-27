@@ -16,7 +16,6 @@ def main():
      url_NDX_PE = "https://danjuanfunds.com/djapi/index_eva/pe_history/NDX?day=all"
      url_NDX_PB = "https://danjuanfunds.com/djapi/index_eva/pb_history/NDX?day=all"
      url_NDX_PRICE = "https://danjuanfunds.com/djapi/fundx/base/index/nav/growth?symbol=GINDX&day=10y" #actually 20y
-
      ## PE
      #    r_NDX_PE = requests.get(url_NDX_PE,headers=my_headers,proxies=proxy,verify=False)
      r_NDX_PE = requests.get(url_NDX_PE,headers=my_headers)
@@ -33,10 +32,12 @@ def main():
      NDX_PRICEstr_s = re.findall('"gr_nav":"(.*?)","gr_per"',r_NDX_PRICE.text)
      NDX_PRICE_DATE_str_s = re.findall('"date":"(.*?)","gr_nav"',r_NDX_PRICE.text)
      NDX_PRICEnum_s = [float(x) for x in NDX_PRICEstr_s]
+     start_yr = 1 # start year of evaluation: from 1 - 10
+     trace_yr = 1 # tracing back years from selected start year: from 1 - 9
      # strategy for NDX parameter
      PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3 = 0.3,0.2,0.1
      PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3 = 1.0,1.0,1.0
-     PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3 = 0.7,0.8,0.9
+     PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3 = 0.7,0.9,1.0
      PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3 = 0.3,0.3,0.6
      # account input: 
      account_money = 100000.0
@@ -44,8 +45,8 @@ def main():
      buy_shares_2 = 100
      buy_shares_3 = 100
      sell_shares_1 = 0
-     sell_shares_2 = 0
-     sell_shares_3 = 100
+     sell_shares_2 = 30
+     sell_shares_3 = 30
      account_shares = 0
      # use strategy1 on Nasdaq QQQM
      NDX2QQQM_ratio = 100
@@ -53,8 +54,8 @@ def main():
      NDX_account_shares,NDX_account_money,NDX_PRICEcurrent,NDX_long_hold_shares,NDX_long_hold_value,NDX_buy_price_list,NDX_sell_price_list,NDX_buy_date_list,NDX_sell_date_list,NDX_actual_buy_price_list,NDX_actual_buy_date_list,NDX_actual_sell_price_list,NDX_actual_sell_date_list\
             = strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
                PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3,PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3,\
-                    account_money,account_shares,buy_shares_1,buy_shares_2,buy_shares_3,sell_shares_1,sell_shares_2,sell_shares_3,NDX2QQQM_ratio)
-     print("final QQQM account shares: ",NDX_account_shares,"\nfinal QQQM account money: ",NDX_account_money,"\nfinal QQQM shares and money combined: ",NDX_account_money+NDX_account_shares*NDX_PRICEcurrent/NDX2QQQM_ratio,"\n")
+                    account_money,account_shares,buy_shares_1,buy_shares_2,buy_shares_3,sell_shares_1,sell_shares_2,sell_shares_3,NDX2QQQM_ratio,start_yr,trace_yr)
+     print("final QQQM account shares: ",NDX_account_shares,"\nfinal QQQM account money: ",NDX_account_money,"\nfinal QQQM shares and money combined: ",NDX_account_money+NDX_account_shares*NDX_PRICEcurrent/NDX2QQQM_ratio)
      print("QQQM shares if buy from start: ",NDX_long_hold_shares,"\nQQQM value if buy from start:",NDX_long_hold_value,"\n")
      ### SP500 info ###
      url_SP500_PE = "https://danjuanfunds.com/djapi/index_eva/pe_history/SP500?day=all"
@@ -80,7 +81,7 @@ def main():
      # strategy for SP500 parameter
      PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3 = 0.3,0.2,0.1
      PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3 = 1.0,1.0,1.0
-     PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3 = 0.7,0.8,1.0
+     PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3 = 0.7,0.9,1.0
      PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3 = 0.3,0.3,1.0
      # account input: 
      account_money = 200000.0
@@ -88,8 +89,8 @@ def main():
      buy_shares_2 = 100
      buy_shares_3 = 100
      sell_shares_1 = 0
-     sell_shares_2 = 0
-     sell_shares_3 = 0
+     sell_shares_2 = 30
+     sell_shares_3 = 30
      account_shares = 0
      # use strategy1 on SP500
      SPX2IVV_ratio = 10
@@ -97,14 +98,14 @@ def main():
      SP500_account_shares,SP500_account_money,SP500_PRICEcurrent,SP500_long_hold_shares,SP500_long_hold_value,SP500_buy_price_list,SP500_sell_price_list,SP500_buy_date_list,SP500_sell_date_list,SP500_actual_buy_price_list,SP500_actual_buy_date_list,SP500_actual_sell_price_list,SP500_actual_sell_date_list\
             = strategy1(SP500_PEnum_s,PE_TSnum_s,SP500_PBnum_s,SP500_PRICEnum_s,SP500_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
                PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3,PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3,\
-                    account_money,account_shares,buy_shares_1,buy_shares_2,buy_shares_3,sell_shares_1,sell_shares_2,sell_shares_3,SPX2IVV_ratio)
+                    account_money,account_shares,buy_shares_1,buy_shares_2,buy_shares_3,sell_shares_1,sell_shares_2,sell_shares_3,SPX2IVV_ratio,start_yr,trace_yr)
      print("final IVV account shares: ",SP500_account_shares,"\nfinal IVV account money: ",SP500_account_money,"\nfinal IVV shares and money combined: ",SP500_account_money+SP500_account_shares*SP500_PRICEcurrent/SPX2IVV_ratio)
      print("SP500 shares if buy from start: ",SP500_long_hold_shares,"\nSP500 value if buy from start:",SP500_long_hold_value,"\n")
      signal.pause()
 
 def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_str_s,PE_buy_thresh1,PE_buy_thresh2,PE_buy_thresh3,PB_buy_thresh1,PB_buy_thresh2,PB_buy_thresh3,\
               PE_sell_thresh1,PE_sell_thresh2,PE_sell_thresh3,PB_sell_thresh1,PB_sell_thresh2,PB_sell_thresh3,\
-               account_money,account_shares,buy_shares_1,buy_shares_2,buy_shares_3,sell_shares_1,sell_shares_2,sell_shares_3,index2fund_ratio):
+               account_money,account_shares,buy_shares_1,buy_shares_2,buy_shares_3,sell_shares_1,sell_shares_2,sell_shares_3,index2fund_ratio,start_yr,trace_yr):
      # PE
      NDX_PEsorted_s = sorted(NDX_PEnum_s)
      NDX_PElen = len(NDX_PEsorted_s)
@@ -115,7 +116,7 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
      NDX_PE80 = NDX_PEsorted_s[math.ceil(PE_sell_thresh2*NDX_PElen)-1]
      NDX_PE90 = NDX_PEsorted_s[math.floor(PE_sell_thresh3*NDX_PElen)-1]
      NDX_PEcurrent = NDX_PEnum_s[NDX_PElen-1]
-     # PE timeing
+     # PE timing
      PE_TSs = [timeStamp(x) for x in PE_TSnum_s]
      # PB
      NDX_PBsorted_s = sorted(NDX_PBnum_s)
@@ -135,7 +136,7 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
      NDX_PRICE70 = NDX_PRICEsorted_s[math.ceil(0.7*NDX_PRICElen)-1]
      NDX_PRICE80 = NDX_PRICEsorted_s[math.ceil(0.8*NDX_PRICElen)-1]
      NDX_PRICEcurrent = NDX_PRICEnum_s[NDX_PRICElen-1]
-     long_hold_shares = math.floor(account_money/NDX_PRICEnum_s[math.floor(NDX_PRICElen/2)]*index2fund_ratio)
+     long_hold_shares = math.floor(account_money/NDX_PRICEnum_s[math.ceil(NDX_PRICElen/10*start_yr)]*index2fund_ratio)
      long_hold_value =  long_hold_shares * NDX_PRICEnum_s[-1]/index2fund_ratio
      #    if  NDX_PEcurrent > NDX_PE80 and NDX_PBcurrent > NDX_PB80:
      #         sell_NDX = 1
@@ -170,10 +171,12 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
      actual_buy_date_list = []
      actual_sell_date_list = []
      actual_sell_price_list = []
-     eval_start = math.ceil(NDX_PElen/2) # start the evaluation from the 6th yr, using the first 5 yrs as index
-     for i in range(eval_start,NDX_PElen):
+     start_idx = math.ceil(NDX_PElen/10*start_yr)
+     trace_len_idx = math.ceil(NDX_PElen/10*trace_yr)
+     # eval_start = math.ceil(NDX_PElen/2) # start the evaluation from the 6th yr, using the first 5 yrs as index
+     for i in range(start_idx,NDX_PElen):
           # PE
-          PEsorted_s = sorted(NDX_PEnum_s[i-eval_start:i])
+          PEsorted_s = sorted(NDX_PEnum_s[i-trace_len_idx:i])
           PElen = len(PEsorted_s)
           PE10 = PEsorted_s[math.floor(PE_buy_thresh3*PElen)-1]
           PE20 = PEsorted_s[math.floor(PE_buy_thresh2*PElen)-1]
@@ -182,7 +185,7 @@ def strategy1(NDX_PEnum_s,PE_TSnum_s,NDX_PBnum_s,NDX_PRICEnum_s,NDX_PRICE_DATE_s
           PE80 = PEsorted_s[math.ceil(PE_sell_thresh2*PElen)-1]
           PE90 = PEsorted_s[math.ceil(PE_sell_thresh3*PElen)-1]
           # PB
-          PBsorted_s = sorted(NDX_PBnum_s[i-eval_start:i])
+          PBsorted_s = sorted(NDX_PBnum_s[i-trace_len_idx:i])
           PBlen = len(PBsorted_s)
           PB10 = PBsorted_s[math.floor(PB_buy_thresh3*PBlen)-1]
           PB20 = PBsorted_s[math.floor(PB_buy_thresh2*PBlen)-1]
