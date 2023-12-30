@@ -69,3 +69,13 @@ account_shares,account_money,PRICEcurrent,long_hold_shares,long_hold_value,buy_p
                account_money,account_shares,buy_shares_1,buy_shares_2,buy_shares_3,sell_shares_1,sell_shares_2,sell_shares_3,index2fund_ratio,start_yr,trace_wks)
 signal.pause()
 # print(data)
+
+# https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY_ADJUSTED&symbol=AAPL&apikey=TGO4S15TZKGFJDIF
+# https://www.alphavantage.co/query?function=SMA&symbol=AAPL&interval=daily&time_period=1&series_type=close&apikey=TGO4S15TZKGFJDIF
+# https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=AAPL&apikey=TGO4S15TZKGFJDIF
+# https://www.alphavantage.co/query?function=EARNINGS&symbol=AAPL&apikey=TGO4S15TZKGFJDIF
+# https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY_ADJUSTED&symbol=MSFT&apikey=TGO4S15TZKGFJDIF
+# https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY_ADJUSTED&symbol=GOOGL&apikey=TGO4S15TZKGFJDIF
+# https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY_ADJUSTED&symbol=NVDA&apikey=TGO4S15TZKGFJDIF
+# https://www.alphavantage.co/query?function=TREASURY_YIELD&interval=daily&maturity=10year&apikey=TGO4S15TZKGFJDIF
+# https://www.alphavantage.co/query?function=FEDERAL_FUNDS_RATE&interval=daily&apikey=TGO4S15TZKGFJDIF
