@@ -61,7 +61,7 @@ for stock_i in stock_names:
             l = losses[i] = ni * v + m * l
         rs = gains / losses
         df['rsi'] = 100 - (100 / (1 + rs))
-        df.rsi.plot(ax=ax, legend='RSI')
+        df.rsi.plot(ax=ax, legend='RSI_'+str(band_low)+'--'+str(band_high))
         fplt.set_y_range(0, 100, ax=ax)
         fplt.add_band(band_low, band_high, ax=ax)
 
