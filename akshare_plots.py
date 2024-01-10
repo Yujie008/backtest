@@ -2,6 +2,8 @@ import pandas as pd
 import akshare as ak
 import finplot as fplt
 import numpy as np
+import warnings
+warnings.simplefilter(action="ignore", category=Warning)
 # stock_us_hist_df = ak.stock_us_hist(symbol='AAPL', start_date="19700101", end_date="22220101", adjust="qfq")
 # print(stock_us_hist_df)
 
@@ -17,8 +19,9 @@ import numpy as np
 # df.set_index('Date', inplace=True)
 # fplt.candlestick_ochl(df[['Open', 'Close', 'High', 'Low']])
 # fplt.show()
-stock_names = ["AAPL","TSLA","SOXX",'TLT','QQQM']
-start_date = "2018-07-01"
+# stock_names = ["AAPL","TSLA","SOXX",'TLT','QQQM']
+stock_names = ["AAPL","TSLA","MSFT"]
+start_date = "2023-01-01"
 for stock_i in stock_names:
     df_US = ak.stock_us_daily(symbol=stock_i,  adjust="qfq")
     # print(df_US)
