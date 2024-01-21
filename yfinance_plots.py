@@ -3,7 +3,7 @@ import yfinance as yf
 import pandas as pd
 import finplot as fplt
 import numpy as np
-import math
+import math,copy
 # data = [(instrument, yf.download(instrument, '2020-10-01')) for instrument in ('AAPL','GOOG','TSLA')]
 # for i,(instrument_a,dfa) in enumerate(data):
 #     for instrument_b,dfb in data[i+1:]:
@@ -14,9 +14,9 @@ import math
 #         # pb.colors['bull_body'] = '#0f0'
 #         # pb.colors['bear_body'] = '#630'
 # fplt.show()
-stock_names = ["AAPL","TSLA","MSFT"]
-start_date = '2023-01-01'
-PE_traced = 40 # using the last 40 working days PE
+stock_names = ["AAPL","TSLA","MSFT",'NVDA','META','AMD']
+start_date = '2022-01-01'
+PE_traced = 66 # using the last 40 working days PE
 PE_low_band_percent,PE_high_band_percent = 0.2,0.8
 for stock_i in stock_names:
     df_US = yf.download(stock_i,start_date,auto_adjust=True)
@@ -69,7 +69,8 @@ for stock_i in stock_names:
     # print(df_US)
     p_length = df_US.shape[0]
     e_length = earnings_dates.shape[0]
-    PE_daily = np.zeros((1,p_length))
+    # PE_daily = np.zeros((1,p_length))
+    PE_daily = []
     PE_sorted = np.zeros((1,PE_traced))
     # PE_low_band = np.zeros((p_length,1))
     # PE_high_band = np.zeros((p_length,1))
@@ -88,15 +89,19 @@ for stock_i in stock_names:
             Reported_EPS_adjusted = -0.01
         else: 
             Reported_EPS_adjusted = Reported_EPS
-        PE_daily[0,ii] = df_US.Close[ii]/Reported_EPS_adjusted
+        PE_daily.append(df_US.Close[ii]/Reported_EPS_adjusted)
         ii = ii+1
     df_US['PE_daily'] = np.transpose(PE_daily)
-    PE_low_band,PE_high_band = np.transpose(PE_daily),np.transpose(PE_daily)
+    # PE_low_band,PE_high_band = np.transpose(PE_daily),np.transpose(PE_daily)
+    PE_low_band,PE_high_band = PE_daily[:PE_traced],PE_daily[:PE_traced]
     for kk in range(p_length):
         if kk > PE_traced-1:
-            PE_sorted = np.sort(PE_daily[0,kk-PE_traced:kk])
-            PE_low_band[kk] = PE_sorted[math.floor(PE_traced*PE_low_band_percent)]
-            PE_high_band[kk] = PE_sorted[math.ceil(PE_traced*PE_high_band_percent)]
+            # PE_daily_copy = copy.deepcopy(PE_daily)
+            PE_rolling = PE_daily[(kk-PE_traced):kk]
+            PE_sorted = sorted(PE_rolling)
+            PE_low_band.append(PE_sorted[math.floor(PE_traced*PE_low_band_percent)])
+            PE_high_band.append(PE_sorted[math.ceil(PE_traced*PE_high_band_percent)])
+            # PE_sorted = np.zeros((1,PE_traced))
     df_US['PE_low_band'] = PE_low_band
     df_US['PE_high_band'] = PE_high_band
     fplt.plot(df_US.PE_daily, ax=ax3, legend='PE_daily')
